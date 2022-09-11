@@ -27,7 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final Telephony telephony = Telephony.instance;
   late String currentNumber;
-  List<String> numberList = [];
+  String Number = "";
   int selected = -1;
   bool isLoading = false;
   void showInSnackBar() {
@@ -48,31 +48,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
-  void saveNumberList(List<String> numbers) async {
+  void saveNumber(String number) async {
     SharedPreferences prefs=await SharedPreferences.getInstance();
-    prefs.setStringList("numberList", numbers);
+    prefs.setString("number", number);
   }
 
-  void getNumberList() async{
+  void getNumber() async{
     setState(() {
       isLoading = true;
     });
     SharedPreferences prefs=await SharedPreferences.getInstance();
-    List<String> mList = (prefs.getStringList('numberList') ?? []);
-    numberList.addAll(mList);
+    String num = (prefs.getString('number') ?? "");
+    Number = num;
     setState(() {
       isLoading = false;
-
     });
   }
 
   @override
   void initState() {
-    telephony.sendSms(
-        to: "1234567890",
-        message: "May the force be with you!"
-    );
-    getNumberList();
+    telephony.requestPhoneAndSmsPermissions;
+    getNumber();
     super.initState();
   }
 
@@ -113,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Container(
                           child: Row(
                             children: [
+
                               Expanded(
                                 flex:8,
                                 child: Container(
@@ -137,10 +134,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                     onPressed :(){
 
                                       setState(() {
-                                        if(currentNumber != null){
-                                          numberList.add(currentNumber);
+                                        if(currentNumber != ""){
+                                          Number = currentNumber ;
                                         }
-                                        saveNumberList(numberList);
+                                        saveNumber(Number);
                                       });
                                     },
                                     child: const Text(
@@ -153,23 +150,19 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
-
                       Expanded(
-                        flex: 8,
+                        flex: 3,
+                        child: Container(),
+                      ),
+                      Expanded(
+                        flex: 6,
                         child: Container(
-                          child: ListView.builder(
-                              itemCount: numberList.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return ListTile(
-                                  onTap: (){
-                                   setState(() {
-                                     selected = index;
-                                   });
-                                  },
-                                    tileColor: selected == index ? Colors.blue : null,
-
-                                    title: Text(numberList[index]));
-                              }),
+                          child: Text(
+                            Number,
+                            style: const TextStyle(
+                              fontSize: 50,
+                            ),
+                          )
                         ),
                       )
                     ],
@@ -177,26 +170,42 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Expanded(
-                  flex: 2,
+                  flex: 6,
                   child: Container(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        ElevatedButton(onPressed: (){
-                        _sendSMS(message1, [numberList[selected]]);
-                        }, child: const Text("Message 1")
+                        SizedBox(
+                          height: 100.0,
+                          child: ElevatedButton(
 
+                              onPressed: (){
+
+                          _sendSMS(message1, [Number]);
+                          }, child: const Text("Message 1")
+
+                          ),
                         ),
-                        ElevatedButton(onPressed: (){
-                          _sendSMS(message2, [numberList[selected]]);
-                        }, child: const Text("Message 2")
+                        SizedBox(
+                          height: 100.0,
+                          child: ElevatedButton(
 
+                              onPressed: (){
+                            _sendSMS(message2, [Number]);
+                          }, child: const Text("Message 2")
+
+                          ),
                         ),
-                        ElevatedButton(onPressed: (){
-                          _sendSMS(message3, [numberList[selected]]);
-                        }, child: const Text("Message 3")
+                        SizedBox(
+                          height: 100.0,
+                          child: ElevatedButton(
 
+                              onPressed: (){
+                            _sendSMS(message3, [Number]);
+                          }, child: const Text("Message 3")
+
+                          ),
                         )
                       ],
                     ),
